@@ -1,0 +1,91 @@
+1 Install Node.js on Ubuntu 20.04
+
+ sudo apt update 
+ sudo apt install nodejs 
+ node -v 
+ Output 
+ v10.19.0 //or more 
+ sudo apt install npm 
+
+2 Clone your project from Github or use FileZilla Client 
+
+To download your app from git
+ git clone yourproject.git 
+
+or with FileZilla  the port is 22 
+
+https://user-images.githubusercontent.com/43730798/255435902-ccdb63b6-ce4c-436f-bede-eedca8f5c12e.png
+
+> Install dependencies and test app
+
+ cd yourproject 
+ npm install 
+ npm start (or whatever your start command) 
+ # stop app 
+ ctrl+C 
+
+3 Setup PM2 process manager to keep your app running
+
+ sudo npm i pm2 -g 
+ pm2 start app (or whatever your file name) 
+
+# Other pm2 commands
+ pm2 show app 
+ pm2 status 
+ pm2 restart app 
+ pm2 stop app 
+ pm2 logs (Show log stream) 
+ pm2 flush (Clear logs) 
+
+# To make sure app starts when reboot
+ pm2 startup ubuntu 
+#to chang port if you wont
+ pm2 start app --port 8082 
+
+4 You must actev attention to activate the firewall according to your server on port 80,443,22
+
+5 Install NGINX and configure
+
+ sudo apt install nginx 
+
+ sudo nano /etc/nginx/sites-available/default 
+
+6 Add the following to the location part of the server block
+
+server_name yourdomain.com www.yourdomain.com;
+
+    location / {
+        proxy_pass http://localhost:3000; #whatever port your app runs on
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+# Check NGINX config
+ sudo nginx -t 
+
+# Restart NGINX
+ sudo service nginx restart 
+
+7 now add  your ip to your domain
+
+
+https://user-images.githubusercontent.com/43730798/255436275-5ffeb1f6-448a-42df-a47c-538214f3e68b.jpg
+
+
+
+https://user-images.githubusercontent.com/43730798/255436293-45643c52-5713-405d-8010-2e01e502a66f.jpg
+
+8 Add SSL with LetsEncrypt
+ sudo add-apt-repository ppa:certbot/certbot 
+ sudo apt-get update 
+ sudo apt-get install python-certbot-nginx 
+ sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com 
+
+# Only valid for 90 days, test the renewal process with
+ certbot renew --dry-run 
+
+Now visit https://yourdomain.com/ and you should see your Node app
+
